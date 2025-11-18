@@ -2,42 +2,27 @@ import { StatCard } from "@/components/StatCard";
 import { AppointmentTable } from "@/components/AppointmentTable";
 import { Users, UserCog, Calendar, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { DashboardStats, Appointment } from "@shared/schema";
 
 export default function Dashboard() {
-  const mockAppointments = [
-    {
-      id: "1",
-      patientName: "Lerato Motsumi",
-      doctorName: "Dr. Thabo Mthembu",
-      date: new Date(2025, 10, 20),
-      time: "09:00 AM",
-      status: "confirmed" as const,
-    },
-    {
-      id: "2",
-      patientName: "David van der Merwe",
-      doctorName: "Dr. Sarah Williams",
-      date: new Date(2025, 10, 20),
-      time: "10:30 AM",
-      status: "pending" as const,
-    },
-    {
-      id: "3",
-      patientName: "Nomfundo Mbeki",
-      doctorName: "Dr. Nomsa Dlamini",
-      date: new Date(2025, 10, 19),
-      time: "02:00 PM",
-      status: "completed" as const,
-    },
-    {
-      id: "4",
-      patientName: "Sipho Ndlovu",
-      doctorName: "Dr. Thabo Mthembu",
-      date: new Date(2025, 10, 18),
-      time: "11:00 AM",
-      status: "completed" as const,
-    },
-  ];
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+    queryKey: ["/api/stats"],
+  });
+
+  const { data: appointments = [], isLoading: appointmentsLoading } = useQuery<Appointment[]>({
+    queryKey: ["/api/appointments"],
+    select: (data) => data.slice(0, 10), // Get recent 10
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-ZA', {
+      style: 'currency',
+      currency: 'ZAR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
     <div className="space-y-6">
@@ -48,36 +33,51 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Doctors"
-          value="1,234"
-          trend={{ value: 12.5, isPositive: true }}
-          icon={UserCog}
-          testId="stat-doctors"
-        />
-        <StatCard
-          title="Active Patients"
-          value="8,547"
-          trend={{ value: 8.2, isPositive: true }}
-          icon={Users}
-          testId="stat-patients"
-        />
-        <StatCard
-          title="Today's Appointments"
-          value="127"
-          trend={{ value: -2.1, isPositive: false }}
-          icon={Calendar}
-          testId="stat-appointments"
-        />
-        <StatCard
-          title="Revenue (MTD)"
-          value="R 245,890"
-          trend={{ value: 15.3, isPositive: true }}
-          icon={TrendingUp}
-          testId="stat-revenue"
-        />
-      </div>
+      {statsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title="Total Doctors"
+            value={stats?.total_doctors.toLocaleString() || "0"}
+            trend={{ value: stats?.doctors_trend || 0, isPositive: (stats?.doctors_trend || 0) > 0 }}
+            icon={UserCog}
+            testId="stat-doctors"
+          />
+          <StatCard
+            title="Active Patients"
+            value={stats?.active_patients.toLocaleString() || "0"}
+            trend={{ value: stats?.patients_trend || 0, isPositive: (stats?.patients_trend || 0) > 0 }}
+            icon={Users}
+            testId="stat-patients"
+          />
+          <StatCard
+            title="Today's Appointments"
+            value={stats?.today_appointments.toLocaleString() || "0"}
+            trend={{ value: stats?.appointments_trend || 0, isPositive: (stats?.appointments_trend || 0) > 0 }}
+            icon={Calendar}
+            testId="stat-appointments"
+          />
+          <StatCard
+            title="Revenue (MTD)"
+            value={formatCurrency(stats?.total_revenue || 0)}
+            trend={{ value: stats?.revenue_trend || 0, isPositive: (stats?.revenue_trend || 0) > 0 }}
+            icon={TrendingUp}
+            testId="stat-revenue"
+          />
+        </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -85,10 +85,24 @@ export default function Dashboard() {
           <CardDescription>Latest bookings across the platform</CardDescription>
         </CardHeader>
         <CardContent>
-          <AppointmentTable
-            appointments={mockAppointments}
-            onView={(id) => console.log("View appointment:", id)}
-          />
+          {appointmentsLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : (
+            <AppointmentTable
+              appointments={appointments.map((apt) => ({
+                ...apt,
+                date: new Date(apt.appointment_date),
+                time: apt.appointment_time,
+                patientName: apt.patient_name || 'Unknown',
+                doctorName: apt.doctor_name || 'Unknown',
+              }))}
+              onView={(id) => console.log("View appointment:", id)}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

@@ -3,58 +3,19 @@ import { FilterBar } from "@/components/FilterBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Download } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Appointment } from "@shared/schema";
 
 export default function Appointments() {
-  const mockAppointments = [
-    {
-      id: "1",
-      patientName: "Lerato Motsumi",
-      doctorName: "Dr. Thabo Mthembu",
-      date: new Date(2025, 10, 20),
-      time: "09:00 AM",
-      status: "confirmed" as const,
-    },
-    {
-      id: "2",
-      patientName: "David van der Merwe",
-      doctorName: "Dr. Sarah Williams",
-      date: new Date(2025, 10, 20),
-      time: "10:30 AM",
-      status: "pending" as const,
-    },
-    {
-      id: "3",
-      patientName: "Nomfundo Mbeki",
-      doctorName: "Dr. Nomsa Dlamini",
-      date: new Date(2025, 10, 19),
-      time: "02:00 PM",
-      status: "completed" as const,
-    },
-    {
-      id: "4",
-      patientName: "Sipho Ndlovu",
-      doctorName: "Dr. Thabo Mthembu",
-      date: new Date(2025, 10, 18),
-      time: "11:00 AM",
-      status: "completed" as const,
-    },
-    {
-      id: "5",
-      patientName: "Anele Mkhize",
-      doctorName: "Dr. Pieter van Zyl",
-      date: new Date(2025, 10, 21),
-      time: "03:00 PM",
-      status: "pending" as const,
-    },
-    {
-      id: "6",
-      patientName: "Johan Botha",
-      doctorName: "Dr. Zanele Khumalo",
-      date: new Date(2025, 10, 17),
-      time: "01:00 PM",
-      status: "cancelled" as const,
-    },
-  ];
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const { data: appointments = [], isLoading } = useQuery<Appointment[]>({
+    queryKey: ["/api/appointments", { status: statusFilter, search: searchQuery }],
+  });
 
   const filters = [
     {
@@ -66,7 +27,7 @@ export default function Appointments() {
         { label: "Completed", value: "completed" },
         { label: "Cancelled", value: "cancelled" },
       ],
-      onChange: (value: string) => console.log("Status filter:", value),
+      onChange: (value: string) => setStatusFilter(value),
     },
     {
       label: "Date Range",
@@ -76,7 +37,7 @@ export default function Appointments() {
         { label: "This Week", value: "week" },
         { label: "This Month", value: "month" },
       ],
-      onChange: (value: string) => console.log("Date filter:", value),
+      onChange: (value: string) => setDateFilter(value),
     },
   ];
 
@@ -103,19 +64,33 @@ export default function Appointments() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Appointments</CardTitle>
+          <CardTitle>All Appointments ({appointments.length})</CardTitle>
           <CardDescription>Search and filter appointments by status and date</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <FilterBar
             searchPlaceholder="Search by patient or doctor name..."
-            onSearchChange={(value) => console.log("Search:", value)}
+            onSearchChange={(value) => setSearchQuery(value)}
             filters={filters}
           />
-          <AppointmentTable
-            appointments={mockAppointments}
-            onView={(id) => console.log("View appointment:", id)}
-          />
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : (
+            <AppointmentTable
+              appointments={appointments.map((apt) => ({
+                ...apt,
+                date: new Date(apt.appointment_date),
+                time: apt.appointment_time,
+                patientName: apt.patient_name || 'Unknown',
+                doctorName: apt.doctor_name || 'Unknown',
+              }))}
+              onView={(id) => console.log("View appointment:", id)}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

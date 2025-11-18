@@ -13,11 +13,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Doctor {
   id: string;
-  name: string;
-  specialty: string;
+  name?: string;
+  practice_name: string;
+  speciality: string;
   province: string;
-  status: "verified" | "pending" | "rejected";
-  experience: number;
+  status?: "verified" | "pending" | "rejected";
+  years_experience: number;
+  specialty?: string;
+  experience?: number;
 }
 
 interface DoctorTableProps {
@@ -65,14 +68,14 @@ export function DoctorTable({
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback>{getInitials(doctor.name)}</AvatarFallback>
+                    <AvatarFallback>{getInitials(doctor.name || doctor.practice_name)}</AvatarFallback>
                   </Avatar>
-                  <div className="font-medium">{doctor.name}</div>
+                  <div className="font-medium">{doctor.name || doctor.practice_name}</div>
                 </div>
               </TableCell>
-              <TableCell>{doctor.specialty}</TableCell>
+              <TableCell>{doctor.specialty || doctor.speciality}</TableCell>
               <TableCell>{doctor.province}</TableCell>
-              <TableCell>{doctor.experience} years</TableCell>
+              <TableCell>{doctor.experience || doctor.years_experience} years</TableCell>
               <TableCell>
                 <Badge
                   variant={
@@ -84,7 +87,7 @@ export function DoctorTable({
                   }
                   data-testid={`badge-status-${doctor.id}`}
                 >
-                  {doctor.status}
+                  {doctor.status || "pending"}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
