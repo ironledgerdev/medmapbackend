@@ -40,7 +40,8 @@ export function DoctorTable({
   onApprove,
   onReject,
 }: DoctorTableProps) {
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined) => {
+    if (!name) return "??";
     return name
       .split(" ")
       .map((n) => n[0])
