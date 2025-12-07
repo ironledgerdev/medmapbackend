@@ -60,6 +60,20 @@ const menuItems = [
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { profile, signOut } = useAuth();
+
+  const userInitials = profile
+    ? `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase()
+    : "AD";
+
+  const userName = profile
+    ? `${profile.first_name} ${profile.last_name}`
+    : "Admin";
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.href = "/login";
+  };
 
   return (
     <Sidebar>
@@ -95,11 +109,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4 border-t">
-        <div className="text-xs text-muted-foreground">
-          <p>Connected to Production</p>
-          <p className="font-mono">medmap.co.za</p>
+      <SidebarFooter className="p-4 border-t space-y-4">
+        <div className="flex items-center gap-3 px-2">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{userInitials}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{userName}</p>
+            <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
+          </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
