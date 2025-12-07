@@ -13,6 +13,7 @@ import type { Doctor } from "@shared/schema";
 
 export default function Doctors() {
   const { toast } = useToast();
+  const { impersonateUser } = useAuth();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [provinceFilter, setProvinceFilter] = useState<string>("all");
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("all");
