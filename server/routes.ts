@@ -9,6 +9,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // In development, we'll skip auth for easier testing
   const isDev = process.env.NODE_ENV === "development";
   const authMiddleware = isDev ? [] : [authenticateAdmin];
+  const optionalAuthMiddleware = isDev ? [] : [authenticateAdmin];
 
   // Dashboard stats
   app.get("/api/stats", ...authMiddleware, async (req, res) => {
