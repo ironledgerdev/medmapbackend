@@ -17,6 +17,33 @@ export default function Appointments() {
     queryKey: ["/api/appointments", { status: statusFilter, search: searchQuery }],
   });
 
+  // Filter appointments by date range
+  const getFilteredByDate = (appointments: Appointment[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    return appointments.filter((apt) => {
+      const aptDate = new Date(apt.appointment_date);
+      const aptDateOnly = new Date(aptDate.getFullYear(), aptDate.getMonth(), aptDate.getDate());
+
+      switch (dateFilter) {
+        case "today":
+          return aptDateOnly.getTime() === today.getTime();
+        case "week":
+          return aptDateOnly >= weekStart && aptDateOnly <= today;
+        case "month":
+          return aptDateOnly >= monthStart && aptDateOnly <= today;
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filteredAppointments = getFilteredByDate(appointments);
+
   const filters = [
     {
       label: "Status",
@@ -64,8 +91,8 @@ export default function Appointments() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Appointments ({appointments.length})</CardTitle>
-          <CardDescription>Search and filter appointments by status and date</CardDescription>
+          <CardTitle>All Appointments ({filteredAppointments.length})</CardTitle>
+          <CardDescription>View all appointments across past, current, and upcoming dates</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <FilterBar
@@ -79,9 +106,13 @@ export default function Appointments() {
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
+          ) : filteredAppointments.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No appointments found for the selected filters
+            </div>
           ) : (
             <AppointmentTable
-              appointments={appointments.map((apt) => ({
+              appointments={filteredAppointments.map((apt) => ({
                 ...apt,
                 date: new Date(apt.appointment_date),
                 time: apt.appointment_time,

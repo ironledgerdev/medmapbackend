@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Eye, Pencil, Trash2, CheckCircle, XCircle, LogIn } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Doctor {
@@ -30,6 +30,7 @@ interface DoctorTableProps {
   onDelete?: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onImpersonate?: (doctor: Doctor) => void;
 }
 
 export function DoctorTable({
@@ -39,6 +40,7 @@ export function DoctorTable({
   onDelete,
   onApprove,
   onReject,
+  onImpersonate,
 }: DoctorTableProps) {
   const getInitials = (name: string | undefined) => {
     if (!name) return "??";
@@ -113,6 +115,14 @@ export function DoctorTable({
                       </Button>
                     </>
                   )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onImpersonate?.(doctor)}
+                    title="Impersonate doctor"
+                  >
+                    <LogIn className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

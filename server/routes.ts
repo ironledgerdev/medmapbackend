@@ -9,6 +9,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // In development, we'll skip auth for easier testing
   const isDev = process.env.NODE_ENV === "development";
   const authMiddleware = isDev ? [] : [authenticateAdmin];
+  const optionalAuthMiddleware = isDev ? [] : [authenticateAdmin];
 
   // Dashboard stats
   app.get("/api/stats", ...authMiddleware, async (req, res) => {
@@ -147,6 +148,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(patient);
     } catch (error: any) {
       console.error('Error fetching patient:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Patient management endpoints
+  app.post("/api/patients", ...authMiddleware, async (req, res) => {
+    try {
+      const { email, first_name, last_name, phone } = req.body;
+
+      if (!email || !first_name || !last_name) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const patient = await storage.createPatient({
+        email,
+        first_name,
+        last_name,
+        phone,
+      });
+
+      res.status(201).json(patient);
+    } catch (error: any) {
+      console.error('Error creating patient:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/patients/:id/password", ...authMiddleware, async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+
+      if (!newPassword) {
+        return res.status(400).json({ error: "New password is required" });
+      }
+
+      const result = await storage.resetPatientPassword(req.params.id, newPassword);
+
+      res.json(result);
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Impersonation endpoints
+  app.post("/api/impersonate/doctor/:id", ...authMiddleware, async (req, res) => {
+    try {
+      const doctor = await storage.getDoctorById(req.params.id);
+      if (!doctor) {
+        return res.status(404).json({ error: "Doctor not found" });
+      }
+
+      res.json({
+        impersonating: doctor,
+        adminId: req.user?.id,
+      });
+    } catch (error: any) {
+      console.error('Error impersonating doctor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/impersonate/patient/:id", ...authMiddleware, async (req, res) => {
+    try {
+      const patient = await storage.getPatientById(req.params.id);
+      if (!patient) {
+        return res.status(404).json({ error: "Patient not found" });
+      }
+
+      res.json({
+        impersonating: patient,
+        adminId: req.user?.id,
+      });
+    } catch (error: any) {
+      console.error('Error impersonating patient:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Activity log endpoints
+  app.get("/api/activity-logs", ...authMiddleware, async (req, res) => {
+    try {
+      const logs = await storage.getActivityLogs({
+        adminId: req.user?.id,
+        limit: 100,
+      });
+      res.json(logs);
+    } catch (error: any) {
+      console.error('Error fetching activity logs:', error);
       res.status(500).json({ error: error.message });
     }
   });

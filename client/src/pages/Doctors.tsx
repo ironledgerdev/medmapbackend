@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, Download } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +13,7 @@ import type { Doctor } from "@shared/schema";
 
 export default function Doctors() {
   const { toast } = useToast();
+  const { impersonateUser } = useAuth();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [provinceFilter, setProvinceFilter] = useState<string>("all");
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("all");
@@ -115,6 +117,14 @@ export default function Doctors() {
     );
   };
 
+  const handleImpersonate = (doctor: Doctor) => {
+    impersonateUser(doctor.user_id || doctor.id);
+    toast({
+      title: "Impersonating Doctor",
+      description: `You are now impersonating ${doctor.name || doctor.practice_name}. Your actions will be recorded.`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -161,6 +171,7 @@ export default function Doctors() {
               onDelete={(id) => console.log("Delete doctor:", id)}
               onApprove={handleApprove}
               onReject={handleReject}
+              onImpersonate={handleImpersonate}
             />
           )}
         </CardContent>
