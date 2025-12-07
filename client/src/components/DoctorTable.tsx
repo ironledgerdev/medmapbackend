@@ -40,6 +40,7 @@ export function DoctorTable({
   onDelete,
   onApprove,
   onReject,
+  onImpersonate,
 }: DoctorTableProps) {
   const getInitials = (name: string | undefined) => {
     if (!name) return "??";
