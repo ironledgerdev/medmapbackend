@@ -118,6 +118,14 @@ export function DoctorTable({
                   <Button
                     variant="ghost"
                     size="icon"
+                    onClick={() => onImpersonate?.(doctor)}
+                    title="Impersonate doctor"
+                  >
+                    <LogIn className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => onView?.(doctor.id)}
                     data-testid={`button-view-${doctor.id}`}
                   >
