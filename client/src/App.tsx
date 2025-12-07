@@ -64,12 +64,7 @@ function Router() {
       <Route path="/doctors" component={Doctors} />
       <Route path="/appointments" component={Appointments} />
       <Route path="/patients" component={Patients} />
-      <Route path="/analytics">
-        <div className="p-6">
-          <h1 className="text-2xl font-semibold">Analytics Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Coming soon...</p>
-        </div>
-      </Route>
+      <Route path="/analytics" component={Analytics} />
       <Route path="/settings">
         <div className="p-6">
           <h1 className="text-2xl font-semibold">Settings</h1>
