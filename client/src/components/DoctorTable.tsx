@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Eye, Pencil, Trash2, CheckCircle, XCircle, LogIn } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Doctor {
