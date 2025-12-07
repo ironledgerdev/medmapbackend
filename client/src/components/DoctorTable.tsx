@@ -30,6 +30,7 @@ interface DoctorTableProps {
   onDelete?: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onImpersonate?: (doctor: Doctor) => void;
 }
 
 export function DoctorTable({
