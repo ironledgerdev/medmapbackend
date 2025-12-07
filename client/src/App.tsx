@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import Dashboard from "@/pages/Dashboard";
 import Doctors from "@/pages/Doctors";
 import Appointments from "@/pages/Appointments";
+import Patients from "@/pages/Patients";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
