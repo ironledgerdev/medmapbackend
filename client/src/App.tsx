@@ -7,10 +7,13 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import Dashboard from "@/pages/Dashboard";
 import Doctors from "@/pages/Doctors";
 import Appointments from "@/pages/Appointments";
+import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
+import { Loader2 } from "lucide-react";
 
 function Router() {
   return (
