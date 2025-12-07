@@ -13,6 +13,7 @@ import Doctors from "@/pages/Doctors";
 import Appointments from "@/pages/Appointments";
 import Patients from "@/pages/Patients";
 import Analytics from "@/pages/Analytics";
+import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import { Loader2 } from "lucide-react";
