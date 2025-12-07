@@ -6,6 +6,7 @@ import {
   BarChart3,
   Settings,
   Heart,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,6 +21,9 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const menuItems = [
   {
