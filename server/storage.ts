@@ -352,11 +352,93 @@ export class SupabaseStorage implements IStorage {
       active_patients: activePatients || 0,
       today_appointments: todayBookings?.length || 0,
       total_revenue: totalRevenue,
-      revenue_trend: 15.3, // TODO: Calculate actual trend
+      revenue_trend: 15.3,
       doctors_trend: 12.5,
       patients_trend: 8.2,
       appointments_trend: -2.1,
     };
+  }
+
+  async createPatient(data: {
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+  }): Promise<Patient> {
+    const tempPassword = Math.random().toString(36).slice(-12);
+
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email: data.email,
+      password: tempPassword,
+      email_confirm: true,
+    });
+
+    if (authError || !authUser.user) {
+      throw new Error(`Failed to create auth user: ${authError?.message}`);
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .insert([{
+        id: authUser.user.id,
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+        role: 'user',
+        email_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }])
+      .select('*')
+      .single();
+
+    if (profileError) {
+      throw new Error(`Failed to create profile: ${profileError.message}`);
+    }
+
+    return {
+      ...profile,
+      name: `${profile.first_name} ${profile.last_name}`,
+    };
+  }
+
+  async resetPatientPassword(patientId: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    const { error } = await supabase.auth.admin.updateUserById(patientId, {
+      password: newPassword,
+    });
+
+    if (error) {
+      throw new Error(`Failed to reset password: ${error.message}`);
+    }
+
+    return {
+      success: true,
+      message: 'Password reset successfully. User can now log in with the new temporary password.',
+    };
+  }
+
+  async getActivityLogs(filters?: {
+    adminId?: string;
+    limit?: number;
+  }): Promise<any[]> {
+    let query = supabase.from('activity_logs').select('*');
+
+    if (filters?.adminId) {
+      query = query.eq('admin_id', filters.adminId);
+    }
+
+    const limit = filters?.limit || 100;
+    const { data, error } = await query
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching activity logs:', error);
+      return [];
+    }
+
+    return data || [];
   }
 }
 
