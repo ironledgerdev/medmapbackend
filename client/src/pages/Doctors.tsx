@@ -117,6 +117,14 @@ export default function Doctors() {
     );
   };
 
+  const handleImpersonate = (doctor: Doctor) => {
+    impersonateUser(doctor.user_id || doctor.id);
+    toast({
+      title: "Impersonating Doctor",
+      description: `You are now impersonating ${doctor.name || doctor.practice_name}. Your actions will be recorded.`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
