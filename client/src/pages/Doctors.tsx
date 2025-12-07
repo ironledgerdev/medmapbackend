@@ -171,6 +171,7 @@ export default function Doctors() {
               onDelete={(id) => console.log("Delete doctor:", id)}
               onApprove={handleApprove}
               onReject={handleReject}
+              onImpersonate={handleImpersonate}
             />
           )}
         </CardContent>
