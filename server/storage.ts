@@ -11,7 +11,7 @@ export interface IStorage {
   }): Promise<Doctor[]>;
   getDoctorById(id: string): Promise<Doctor | null>;
   updateDoctorStatus(id: string, approved: boolean): Promise<Doctor | null>;
-  
+
   // Appointments/Bookings
   getAppointments(filters?: {
     status?: string;
@@ -20,15 +20,28 @@ export interface IStorage {
   }): Promise<Appointment[]>;
   getAppointmentById(id: string): Promise<Appointment | null>;
   updateAppointmentStatus(id: string, status: "pending" | "confirmed" | "cancelled" | "completed"): Promise<Appointment | null>;
-  
+
   // Patients/Profiles
   getPatients(filters?: {
     search?: string;
   }): Promise<Patient[]>;
   getPatientById(id: string): Promise<Patient | null>;
-  
+  createPatient(data: {
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+  }): Promise<Patient>;
+  resetPatientPassword(patientId: string, newPassword: string): Promise<{ success: boolean; message: string }>;
+
   // Dashboard
   getDashboardStats(): Promise<DashboardStats>;
+
+  // Activity logs
+  getActivityLogs(filters?: {
+    adminId?: string;
+    limit?: number;
+  }): Promise<any[]>;
 }
 
 export class SupabaseStorage implements IStorage {
