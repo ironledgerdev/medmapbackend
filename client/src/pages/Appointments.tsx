@@ -17,6 +17,33 @@ export default function Appointments() {
     queryKey: ["/api/appointments", { status: statusFilter, search: searchQuery }],
   });
 
+  // Filter appointments by date range
+  const getFilteredByDate = (appointments: Appointment[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    return appointments.filter((apt) => {
+      const aptDate = new Date(apt.appointment_date);
+      const aptDateOnly = new Date(aptDate.getFullYear(), aptDate.getMonth(), aptDate.getDate());
+
+      switch (dateFilter) {
+        case "today":
+          return aptDateOnly.getTime() === today.getTime();
+        case "week":
+          return aptDateOnly >= weekStart && aptDateOnly <= today;
+        case "month":
+          return aptDateOnly >= monthStart && aptDateOnly <= today;
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filteredAppointments = getFilteredByDate(appointments);
+
   const filters = [
     {
       label: "Status",
